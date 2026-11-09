@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codeme-docs"
+version = "0.1.0"
+description = "Authoritative documentation and synchronization engine for Codeme platform"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "CC-BY-4.0"
+authors = [
+    {name = "Codeme Maintainers", email = "oss@codeme.io"}
+]
+dependencies = []
+
+[project.scripts]
+codeme-docs-sync = "codeme_docs.sync:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
