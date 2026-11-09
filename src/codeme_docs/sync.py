@@ -97,6 +97,39 @@ class DocumentationSynchronizer:
 
         return len(discrepancies) == 0, discrepancies
 
+    def validate_customer_documentation(self) -> Tuple[bool, List[str]]:
+        """Verifies all mandatory customer user guides and operations guides exist and are non-empty."""
+        discrepancies: List[str] = []
+        user_guide_dir = self.docs_repo / "docs" / "user-guide"
+        ops_guide_dir = self.docs_repo / "docs" / "operations"
+
+        required_user_guides = [
+            "getting-started.md",
+            "supported-editions.md",
+            "cli-engines.md",
+            "licensing-and-activation.md",
+            "team-seat-management.md",
+            "enterprise-air-gap.md",
+            "oem-integration.md",
+            "troubleshooting.md",
+        ]
+        required_ops_guides = [
+            "commercial-release-guide.md",
+            "production-gating-and-authorization.md",
+        ]
+
+        for doc in required_user_guides:
+            p = user_guide_dir / doc
+            if not p.is_file() or p.stat().st_size == 0:
+                discrepancies.append(f"Missing or empty customer user guide: docs/user-guide/{doc}")
+
+        for doc in required_ops_guides:
+            p = ops_guide_dir / doc
+            if not p.is_file() or p.stat().st_size == 0:
+                discrepancies.append(f"Missing or empty operations guide: docs/operations/{doc}")
+
+        return len(discrepancies) == 0, discrepancies
+
     def run(self, perform_sync: bool = True) -> SyncReport:
         adrs_synced = 0
         if perform_sync:
@@ -125,6 +158,13 @@ class DocumentationSynchronizer:
             checks_passed.append("Repository Registry Path Synchronization")
         else:
             all_discrepancies.extend(r_discrepancies)
+
+        # Check 4: Customer Documentation Verification (Phase 6)
+        docs_ok, doc_discrepancies = self.validate_customer_documentation()
+        if docs_ok:
+            checks_passed.append("Customer User & Operations Guides Completeness")
+        else:
+            all_discrepancies.extend(doc_discrepancies)
 
         is_sync = (len(all_discrepancies) == 0)
 
